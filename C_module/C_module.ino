@@ -12,6 +12,7 @@ void setup() {
   Serial.println("Readings:");
 }
 
+
 void loop() {
   Serial.print("Reading: ");
   Serial.print(scale.get_units(), 1);  //무제 출력 
