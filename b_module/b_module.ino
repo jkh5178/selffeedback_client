@@ -11,6 +11,7 @@ const char* password =  "smart1234";
 const uint16_t port = 8090;
 const char * host = "192.168.0.2";
 
+
 int opentime=0
 
 void connectWiFi(const char* ssid,const char* password){
