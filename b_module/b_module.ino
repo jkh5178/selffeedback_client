@@ -7,12 +7,12 @@ bool play_key = false;
 
 const char* ssid = "smartFactory";
 const char* password =  "smart1234";
-
+ 
 const uint16_t port = 8090;
 const char * host = "192.168.0.2";
 
 
-int opentime=0
+int opentime=0;
 
 void connectWiFi(const char* ssid,const char* password){
     WiFi.begin(ssid, password);
@@ -55,8 +55,8 @@ void loop() {
         }
        else{
         opentime=m.toInt();
-        Serial.print("opentime : ")
-        Serial.print(opentime)
+        Serial.print("opentime : ");
+        Serial.print(opentime);
         }
       }
       //서버에서 메시지 기다리기
