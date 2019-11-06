@@ -1,49 +1,82 @@
-/* 
-  IR sensor - WPS-SMVN 
-  Detector distance : 1.5[m]
-  Output : NPN Current
-*/ 
+#include <ESP8266WiFi.h>
 #include <Servo.h>
-// #1. 초기 변수(Parameter) 설정
-int sensorPin = A0;   // IR Sensor PIN Number
-int sensorValue = 0;  // Sensor Value Parameter
-Servo myservo;
 
-// #2. Setup
-void setup() {
-  Serial.begin(9600);        // Computer Serial(시리얼통신을 통해 컴퓨터로 모니터링함)
-  pinMode(sensorPin, INPUT); // 적외선 센서의 출력 값을 계속 읽겠다.(입력모드)
-  myservo.attach(7);
+Servo belt_servo;
+
+int ray_Value=0;
+int ray_Pin = A0;
+
+bool key=false;
+bool play_key = false;
+const char* ssid = "smartFactory";
+const char* password =  "smart1234";
+ 
+const uint16_t port = 8090;
+const char * host = "192.168.0.2";
+void connectWiFi(const char* ssid,const char* password){
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("...");
+  }
+ 
+  Serial.print("WiFi connected with IP: ");
+  Serial.println(WiFi.localIP());
+  }
+
+void setup()
+{
+ 
+  Serial.begin(115200);
+  connectWiFi(ssid,password);
+  pinMode(ray_Pin, INPUT);
+  belt_servo.attach(D8);
 }
-int k=1023;
-// #3. Loop문
-void loop() {
-  
-  // IR Sensor READ
-  sensorValue = analogRead(sensorPin); // 적외선 빔 센서가 물체를 계속 감지합니다. 
-  
-   Serial.print(sensorValue);
-   Serial.print(", ");
-   Serial.print(k);
-   Serial.print("\n");
+ 
+void loop()
+{
+    WiFiClient client;
+ 
+    if (!client.connect(host, port)) {
+        Serial.println("Connection to host failed");
+        delay(1000);
+        return;
+    }
 
-    if(sensorValue <= 100 ){
-      myservo.write(90);
+    //서버 연결시 공정 이름 전송
+    Serial.println("Connected to server successful!");
+    client.print("D");
+    Serial.println("D");
+    
+    while(client.connected()){
+      while(!play_key){
+      String m = client.readStringUntil('\n');
+      if(m=="start"){
+        play_key = true;
+        break;
+        }
+      }
+      ray_Value = analogRead(ray_Pin);
+      belt_servo.write(180);
+      Serial.println(ray_Value);
       
-    }
-    else{
-      k=sensorValue;
-      myservo.write(180);
-    }
-  
-  // IR Sensor READ AD -> Print(Serial monitor) 모니터에 아날로그 값을 보내줍니다. 
-
-
-  // Dark ON(Object ON) : about 0[V] // Dark Off(Object Off) : about 5[V] // So, 0~5[V] == 0~1023(ADC Value) 
-  // if Dark Off(Object Off) 5[V] => ADC Value : 1023, So about (sensorValue <= 800)
-  
-  // 1023보다 작을 시에 물체가 있다고 감지합니다. 적절하게 800보다 작을 경우에 물체로 인지하도록 합니다. 
-//물체가 감지됬을 경우 0에 가까운 값이 나옵니다. 
-
-  delay(120); // System delay
+      if(ray_Value<=100){
+        //stop
+        belt_servo.write(90);
+        client.print("stop");
+        key=true;
+        while(key){
+        String m=client.readStringUntil('\n');
+        if(m=="go"){
+          belt_servo.write(180);
+          delay(500);
+          key=false;
+          
+          }
+        }}
+      delay(80);    
+      }
+    //Serial.println("Disconnecting...");
+    //client.stop();
+    delay(10000);
 }
