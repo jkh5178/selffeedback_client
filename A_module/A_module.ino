@@ -6,7 +6,6 @@ Servo open_servo;
 int ray_Value=0;
 int ray_Pin = A0;
 
-int pos = 0;
 bool play_key = false;
 
 
@@ -33,7 +32,7 @@ void setup()
   connectWiFi(ssid,password);
   pinMode(ray_Pin, INPUT);
   open_servo.attach(D8);
-  open_servo.write(pos);
+  open_servo.write(0);
 }
  
 void loop()
@@ -52,7 +51,8 @@ void loop()
     Serial.println("A");
     
     while(client.connected()){
-      while(!play_key){
+      play_key = false;
+      while(!play_key && client.connected()){
         String m = client.readStringUntil('\n');
         if(m=="start"){
           play_key = true;
@@ -60,21 +60,17 @@ void loop()
         }
       }
       
-      ray_Value = analogRead(ray_Pin);
-      Serial.println(ray_Value);
-      
-      if(ray_Value>=100){
+      //ray_Value = analogRead(ray_Pin);
+      //Serial.println(ray_Value);
+      if(analogRead(ray_Pin)>100){
         //start servo
-        pos +=120;
-        open_servo.write(pos);
+        open_servo.write(120);
         delay(500);
-        pos = 0;
-        open_servo.write(pos);
-        delay(500);
+        open_servo.write(0);
+        delay(800);
      }
-     delay(80);
+     delay(800);
       }
     //Serial.println("Disconnecting...");
     //client.stop();
-    delay(10000);
 }
