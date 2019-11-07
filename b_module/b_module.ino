@@ -4,6 +4,7 @@
 Servo myservo; 
 int pos = 0;
 bool play_key = false;
+bool getvaluecheck=false;
 
 const char* ssid = "smartFactory";
 const char* password =  "smart1234";
@@ -30,11 +31,12 @@ void setup() {
   myservo.attach(D8);
   Serial.begin(115200);
   connectWiFi(ssid,password);
-  myservo.write(pos);
+  myservo.write(0);
 }
 
 void loop() {
     WiFiClient client;
+    myservo.write(0);
     if (!client.connect(host, port)) {
         Serial.println("Connection to host failed");
         delay(1000);
@@ -42,26 +44,26 @@ void loop() {
     }
     //B라는 공정 명 서버로 전송
     Serial.println("Connected to server successful!");
-    client.print("B");
-    Serial.println("B");
+    client.print("C");
+    Serial.println("C");
     
     while(client.connected()){
       //서버에서 start메시지 기다리기
-      while(!play_key){
+      while(!play_key && client.connected()){
       String m = client.readStringUntil('\n');
       if(m=="start"){
         play_key = true;
         break;
         }
-       else{
+       else if(!getvaluecheck){
         opentime=m.toInt();
         Serial.print("opentime : ");
-        Serial.print(opentime);
+        Serial.println(opentime);
+        getvaluecheck=true;
         }
       }
       //서버에서 메시지 기다리기
       String m=client.readStringUntil('\n');
-      
       if(m=="stop"){//stop 메시지가 날라올 경우
         myservo.write(15);//15도로 서보모터를 열기
         delay(opentime);//2초간의 딜레이
