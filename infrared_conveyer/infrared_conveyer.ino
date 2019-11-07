@@ -4,12 +4,12 @@
 Servo belt_servo;
 
 int ray_Value=0;
-String ray_Value2="";
-int ray_Pin = A0;
-int ray_Pin2 = D2;
+int ray_Value2=0;
+int ray_Pin = D6;
+int ray_Pin2 = D7;
 
 
-bool key=false;
+int key=0;
 bool play_key = false;
 const char* ssid = "smartFactory";
 const char* password =  "smart1234";
@@ -26,6 +26,21 @@ void connectWiFi(const char* ssid,const char* password){
   Serial.print("WiFi connected with IP: ");
   Serial.println(WiFi.localIP());
   }
+
+  void wait_message(String send_to, String rcv_data,WiFiClient client){
+    //stop
+        belt_servo.write(90);
+        client.print(send_to+";stop");
+        bool key=true;
+        while(key){
+        String m=client.readStringUntil('\n');//5초
+        if(m==rcv_data){
+          belt_servo.write(180);
+          key=false;
+          delay(500);
+          }
+       }
+    }
 
 void setup()
 {
@@ -65,26 +80,34 @@ void loop()
         } 
       }
       //센서값 받기
-      ray_Value = analogRead(ray_Pin);
-      Serial.println(ray_Value);//시리얼에 센서값 전송
-      
+      ray_Value = digitalRead(ray_Pin);
+      //시리얼에 센서값 전송
       //컨베이어 벨트 마지막
-      //ray_Value2 = 
-      
-      if(ray_Value<=100){
-        //stop
-        belt_servo.write(90);
-        client.print("stop");
-        key=true;
-        while(key){
-        String m=client.readStringUntil('\n');//5초
-        if(m=="go"){
+      ray_Value2 = digitalRead(ray_Pin2);
+      Serial.print(ray_Value);
+      Serial.print(", ");
+      Serial.println(ray_Value2);
+      if(ray_Value2+ray_Value<2){
+        if(ray_Value2+ray_Value==0){
+          belt_servo.write(90);
+          client.print("C;stop");
+          client.print("B;stop");
+          key=0;
+          while(key<2){
+            String m=client.readStringUntil('\n');//5초
+            if(m=="go1" || m=="go2"){
+              key++;
+            }
           belt_servo.write(180);
-          key=false;
-          delay(500);
+          break;
+            }
           }
-       }
-      }
+         else if(ray_Value2==0){
+           wait_message("C","go2",client);
+          }else if(ray_Value==0){
+            wait_message("B","go",client);
+          }          
+        }
       delay(100);    
      }
 }
