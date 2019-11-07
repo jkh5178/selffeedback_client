@@ -4,7 +4,10 @@
 Servo belt_servo;
 
 int ray_Value=0;
+String ray_Value2="";
 int ray_Pin = A0;
+int ray_Pin2 = D2;
+
 
 bool key=false;
 bool play_key = false;
@@ -26,57 +29,62 @@ void connectWiFi(const char* ssid,const char* password){
 
 void setup()
 {
- 
   Serial.begin(115200);
   connectWiFi(ssid,password);
   pinMode(ray_Pin, INPUT);
+  pinMode(ray_Pin2, INPUT);//컨베이어 벨트 마지막
   belt_servo.attach(D8);
 }
  
 void loop()
 {
     WiFiClient client;
- 
+
     if (!client.connect(host, port)) {
         Serial.println("Connection to host failed");
         delay(1000);
         return;
     }
-
+    belt_servo.write(90);
+    key=false;
+    play_key=false;
     //서버 연결시 공정 이름 전송
     Serial.println("Connected to server successful!");
     client.print("D");
     Serial.println("D");
     //서버랑 연결되어 있을시
     while(client.connected()){
+      
       //서버에서 start명령 기다리기
-      while(!play_key){
+      while(!play_key && client.connected()){
       String m = client.readStringUntil('\n');
       if(m=="start"){
         play_key = true;
         belt_servo.write(180);
         break;
-        }
+        } 
       }
       //센서값 받기
       ray_Value = analogRead(ray_Pin);
       Serial.println(ray_Value);//시리얼에 센서값 전송
       
-      if(ray_Value<=100){//측정 센서 값이 100이하이면 물체가 있다고 판별
-        belt_servo.write(90);//stop
-        client.print("stop");//서버에게 벨트 정지 전송
-        }
-      String m=client.readStringUntil('\n');// 메시지 수신
+      //컨베이어 벨트 마지막
+      //ray_Value2 = 
       
-      if(m=="go"){//서버에서 go 라는 명령이 올시 
-          belt_servo.write(180);//벨트를 움직이게하고
-          delay(500);//0.5초의 딜레이를 갖는다.
+      if(ray_Value<=100){
+        //stop
+        belt_servo.write(90);
+        client.print("stop");
+        key=true;
+        while(key){
+        String m=client.readStringUntil('\n');//5초
+        if(m=="go"){
+          belt_servo.write(180);
+          key=false;
+          delay(500);
           }
-      if(m=="end"){//서버에서 end 라는 명령이 올시
-        belt_servo.write(90);//stop
-        play_key=false;//start명령이 기다릴수 있도록 조건 변경
-        }
-      delay(100);    
+       }
       }
-    delay(10000);
+      delay(100);    
+     }
 }
