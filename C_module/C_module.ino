@@ -33,11 +33,12 @@ void connectWiFi(const char* ssid,const char* password){
 
 void setup() {
   Serial.begin(115200);
-  connectWiFi(ssid,password);
-  Serial.println("HX711 scale TEST");  
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
   scale.set_scale(2280.f);   //스케일 지정 
   scale.tare();  //스케일 설정
+  connectWiFi(ssid,password);
+  Serial.println("HX711 scale TEST");  
+
 }
 
 
@@ -78,13 +79,20 @@ void loop() {
           }
           getvaluecheck++;
       }
-
+       String m = client.readStringUntil('\n');
+       Serial.print(m);
+       if(m=="stop"){
+           float value=abs(scale.get_units(5));
+           Serial.println(value, 1);
+           dtostrf(value,6,3,sendtemp);
+           client.print(sendtemp);
+           /*무게 판별과 서보모터 움직*/
+        delay(500);//0.5초간의 딜레이
+        client.print("go2");//go메시지 전달
+        }
       
       //무게 측정 해서 전송
-      float value=abs(scale.get_units(5));
-      Serial.println(value, 1);
-      dtostrf(value,6,3,sendtemp);
-      client.print(sendtemp);
+
       delay(1500);
       }
 }
