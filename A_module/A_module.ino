@@ -49,9 +49,9 @@ void loop()
     Serial.println("Connected to server successful!");
     client.print("A");
     Serial.println("A");
-    
+    play_key = false;
     while(client.connected()){
-      play_key = false;
+      
       while(!play_key && client.connected()){
         String m = client.readStringUntil('\n');
         if(m=="start"){
@@ -67,7 +67,7 @@ void loop()
         open_servo.write(120);
         delay(500);
         open_servo.write(0);
-        delay(800);
+        delay(500);
      }
      delay(800);
       }
