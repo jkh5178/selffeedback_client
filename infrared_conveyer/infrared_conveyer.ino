@@ -35,9 +35,7 @@ void connectWiFi(const char* ssid,const char* password){
         while(key){
         String m=client.readStringUntil('\n');//5초
         if(m==rcv_data){
-          belt_servo.write(180);
-          key=false;
-          delay(500);
+            return ;
           }
        }
     }
@@ -104,8 +102,12 @@ void loop()
           }
          else if(ray_Value2==0){
            wait_message("C","go2",client);
+           delay(500);
+           belt_servo.write(180);
           }else if(ray_Value==0){
-            wait_message("B","go",client);
+            wait_message("B","go",client);          
+           belt_servo.write(180);
+           delay(500);
           }          
         }
       delay(100);    
