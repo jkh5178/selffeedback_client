@@ -8,16 +8,16 @@
 //서버 모터, 무게센서  클래스 생성
 Servo myservo; 
 HX711 scale;
-bool play_key = false;//서버에서 공정 시작 메시지를 받았나
-int getvaluecheck=0;//정지 되어 있을때 받은 메시지의 종류
-char sendtemp[10];// float를 string으로 바꾸기 위한 배열
+WiFiClient client;
+
+// float를 string으로 바꾸기 위한 배열
 
 //wifi, server로 연결하기 위한 정보
-const char* ssid = "smartFactory";
-const char* password =  "smart1234";
+const char* SSID = "smartFactory";
+const char* PASSWORD =  "smart1234";
  
-const uint16_t port = 8090;
-const char * host = "192.168.0.2";
+const uint16_t PORT = 8090;
+const char * HOST = "192.168.0.2";
 //무게 센서의 핀 번호
 const int LOADCELL_DOUT_PIN = D7;
 const int LOADCELL_SCK_PIN = D6;
@@ -46,7 +46,7 @@ void setup() {
   myservo.attach(D8);//D8번 핀으로 서보모터 조작
   myservo.write(90);
   scale.tare();  //스케일 설정 0점 조절
-  connectWiFi(ssid,password);
+  connectWiFi(SSID,PASSWORD);
   Serial.println("HX711 scale TEST");  
 
 }
@@ -54,9 +54,9 @@ void setup() {
 
 void loop() {
   //서버 연결을 위한 클래스
-   WiFiClient client;
+
    //서버와 연결 확인
-    if (!client.connect(host, port)) {
+    if (!client.connect(HOST, PORT)) {
         Serial.println("Connection to host failed");
         delay(1000);
         return;
@@ -64,8 +64,8 @@ void loop() {
     //서버와 연결후의 작업
     //B라는 공정 명 서버로 전송
     //공정값 초기화
-    play_key = false;
-    getvaluecheck=0;
+    bool play_key = false;
+    int getvaluecheck=0;
     //서버 연결 확인 
     Serial.println("Connected to server successful!");
     //공정의 이름 전송
@@ -75,8 +75,8 @@ void loop() {
     while(client.connected()){
       //서버에서 start메시지 대기
       while(!play_key && client.connected()){
-      String m = client.readStringUntil('\n');
-      if(m=="start"){
+      String message = client.readStringUntil('\n');
+      if(message=="start"){
         play_key = true;
         break;
         }
@@ -84,24 +84,20 @@ void loop() {
       switch(getvaluecheck){
         //무게값 받아오기
           case 0:
-            weight=m.toInt();
-            Serial.print("w : ");
-            Serial.println(weight);
+            weight=message.toInt();
             break;
         //판별 범위 받아오기
           case 1:
-            range=0.01*m.toInt();
-            Serial.print("r : ");
-            Serial.println(range);
+            range=0.01*message.toInt();
             break;
           }
           getvaluecheck++;
       }
       //서버에서 오는 메시지 대기
-       String m = client.readStringUntil('\n');
-       Serial.print(m);
+       String message = client.readStringUntil('\n');
+       Serial.print(message);
        //컨베이어에서 오는 stop메시지
-       if(m=="stop"){
+       if(message=="stop"){
             //컵이 무게센서에 대기후
            delay(1000);
            //무게 측정 10개의 측정후 평균 계산
@@ -110,13 +106,11 @@ void loop() {
            
            Serial.println(value, 1);
            //float의 값을 string으로 변환
+           char sendtemp[10];
            dtostrf(value,6,3,sendtemp);
            //server로 value 전달
            client.print(sendtemp);
-           //
-           Serial.print(weight-weight*range);
-           Serial.print(", ");
-           Serial.println(weight+weight*range);
+
            //범위 안에 센서값이 있는지 측정
            if( value>=(weight-weight*range) && value<=(weight+weight*range)){
             //있을 경우 왼쪽으로 회전/양품 
