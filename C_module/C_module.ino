@@ -130,7 +130,7 @@ void loop() {
         //분류를 한후 원위치로 조정
         myservo.write(90);
         //컨베이어로 끝났다는 메시지 전송
-        client.print("go2");//go메시지 전달
+        client.print("go");//go메시지 전달
         }
       delay(1500);
       }
