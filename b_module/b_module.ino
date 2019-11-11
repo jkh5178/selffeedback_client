@@ -6,8 +6,8 @@
 */
 Servo myservo; // 서보모터 제어의 개체
 
-bool play_key = false; //공정 작동을 제어하기 위한 bool 변수
-bool getvaluecheck=false; // 서버로부터 맞는 값이 들어왔는지 확인하기 위한 bool 변수
+bool playKey = false; //공정 작동을 제어하기 위한 bool 변수
+bool getValueCheck=false; // 서버로부터 맞는 값이 들어왔는지 확인하기 위한 bool 변수
 
 const char* ssid = "smartFactory"; // 사용할 wifi ID
 const char* password =  "smart1234"; // 사용할 wifi PW
@@ -15,7 +15,7 @@ const char* password =  "smart1234"; // 사용할 wifi PW
 const uint16_t port = 8090; // 서버 접속 포트번호
 const char * host = "192.168.0.2"; // 서버의 IP주소
 
-int opentime=0; // 서보모터 제어시간 0으로 초기화
+int openTime=0; // 서보모터 제어시간 0으로 초기화
 
 //wemos 보드 wifi 접속 함수
 void connectWiFi(const char* ssid,const char* password){
@@ -53,32 +53,32 @@ void loop() {
     
     while(client.connected()){
       //서버로 부터의 start 메세지 수신 대기
-      while(!play_key && client.connected()){
+      while(!playKey && client.connected()){
       String m = client.readStringUntil('\n');
       if(m=="start"){
-        play_key = true;
+        playKey = true;
         break;
         }
         
-       else if(!getvaluecheck){
-        opentime=m.toInt(); // 서버로부터의 모터 제어시간 int 형으로 받아오기
+       else if(!getValueCheck){
+        openTime=m.toInt(); // 서버로부터의 모터 제어시간 int 형으로 받아오기
         Serial.print("opentime : ");
-        Serial.println(opentime); // 알맞는 값이 들어왔는지 확인하기 위한 출력
-        getvaluecheck=true; //값을 받아왔을 때 bool 변수 true로 변경
+        Serial.println(openTime); // 알맞는 값이 들어왔는지 확인하기 위한 출력
+        getValueCheck=true; //값을 받아왔을 때 bool 변수 true로 변경
         }
       }
       //서버로부터 메세지 수신대기
       String m=client.readStringUntil('\n');
       if(m=="stop"){//stop 메시지가 날라올 경우
         myservo.write(15);//15도로 서보모터를 열기
-        delay(opentime);//2초간의 딜레이
+        delay(openTime);//2초간의 딜레이
         myservo.write(0);//0도로 닫기
         delay(500);//0.5초간의 딜레이
         client.print("go");//go메시지 전달
         }
         
       if(m=="end"){//end메시지가 전송될 경우
-        play_key = false; //공정 제어 변수 false로 초기화
+        playKey = false; //공정 제어 변수 false로 초기화
        }
       delay(1000);   // 1초간 딜레이
       }

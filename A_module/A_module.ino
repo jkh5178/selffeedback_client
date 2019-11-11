@@ -6,13 +6,13 @@
 */
 
 
-Servo open_servo; //서보모터 제어의 개체
+Servo openServo; //서보모터 제어의 개체
 
-int ray_Value=0; //적외선 센서의 값을 받는 변수
-int ray_Pin = A0; // 적외선 센서의 핀번호
+int rayValue=0; //적외선 센서의 값을 받는 변수
+int rayPin = A0; // 적외선 센서의 핀번호
 
 
-bool play_key = false; //공정 작동을 제어하기 위한 bool 변수
+bool playKey = false; //공정 작동을 제어하기 위한 bool 변수
 
 
 const char* ssid = "smartFactory"; // 사용할 wifi ID
@@ -37,9 +37,9 @@ void setup()
 {
   Serial.begin(115200); // Serial 모니터 값 115200 설정
   connectWiFi(ssid,password); //wemos 보드 wifi 접속 
-  pinMode(ray_Pin, INPUT);
-  open_servo.attach(D8); //서보 모터 연결 pin번호
-  open_servo.write(0); // 서보 모터의 값 0으로 초기화
+  pinMode(rayPin, INPUT);
+  openServo.attach(D8); //서보 모터 연결 pin번호
+  openServo.write(0); // 서보 모터의 값 0으로 초기화
 }
  
 void loop()
@@ -57,27 +57,27 @@ void loop()
     Serial.println("Connected to server successful!");
     client.print("A");
     Serial.println("A");
-    play_key = false;
+    playKey = false;
     while(client.connected()){
       
-      while(!play_key && client.connected()){
+      while(!playKey && client.connected()){
         //서버로 부터의 start 메세지 수신 대기
         String m = client.readStringUntil('\n');
         if(m=="start"){
-          play_key = true;
+          playKey = true;
           break;
         }
       }
       
-      //ray_Value = analogRead(ray_Pin);
-      //Serial.println(ray_Value);
+      //rayValue = analogRead(rayPin);
+      //Serial.println(rayValue);
       
       //적외선 값이 100보다 클때(즉 물체인식을 하지 못할 때) 서보모터 제어
-      if(analogRead(ray_Pin)>100){
+      if(analogRead(rayPin)>100){
         //start servo
-        open_servo.write(120);
+        openServo.write(120);
         delay(500);
-        open_servo.write(0);
+        openServo.write(0);
         delay(500);
      }
      delay(800);
