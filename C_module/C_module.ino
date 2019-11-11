@@ -3,13 +3,14 @@
  * 작업 : 무게를 측정하여 서버로 무게를 전송
 */
 #include "HX711.h" //HX711로드셀 엠프 관련함수 호출
-#include <ESP8266WiFi.h>
+#include "FactoryClient.h"
 #include <Servo.h>
 //서버 모터, 무게센서  클래스 생성
 Servo myservo; 
 HX711 scale;
 WiFiClient client;
-
+FactoryClient connectHelper;
+const char*  modulName="C";
 // float를 string으로 바꾸기 위한 배열
 
 //wifi, server로 연결하기 위한 정보
@@ -26,17 +27,6 @@ const int LOADCELL_SCK_PIN = D6;
 int weight=0;
 float range=0.0;
 
-//wifi연결을 위한 함수
-void connectWiFi(const char* ssid,const char* password){
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.println("...");
-  }
- 
-  Serial.print("WiFi connected with IP: ");
-  Serial.println(WiFi.localIP());
-  }
 
 //시스템 시작점
 void setup() {
@@ -46,41 +36,34 @@ void setup() {
   myservo.attach(D8);//D8번 핀으로 서보모터 조작
   myservo.write(90);
   scale.tare();  //스케일 설정 0점 조절
-  connectWiFi(SSID,PASSWORD);
+  connectHelper.connectWiFi(SSID,PASSWORD);
   Serial.println("HX711 scale TEST");  
 
 }
 
-
+String message="";
 void loop() {
   //서버 연결을 위한 클래스
 
    //서버와 연결 확인
-    if (!client.connect(HOST, PORT)) {
-        Serial.println("Connection to host failed");
-        delay(1000);
+    if (!connectHelper.connectedServer(PORT,HOST,modulName,&client)) {
         return;
     }
     //서버와 연결후의 작업
     //B라는 공정 명 서버로 전송
     //공정값 초기화
+    Serial.println("con!!!!!!!!!!!!!!!!!!");
     bool play_key = false;
     int getvaluecheck=0;
     //서버 연결 확인 
-    Serial.println("Connected to server successful!");
-    //공정의 이름 전송
-    client.print("C");
-    Serial.println("C");
     //서버와 연결이 되어있을 때만 작동
     while(client.connected()){
       //서버에서 start메시지 대기
-      while(!play_key && client.connected()){
-      String message = client.readStringUntil('\n');
-      if(message=="start"){
-        play_key = true;
-        break;
-        }
+      
+      while(!connectHelper.readStart(client,&play_key,&message)){
       //서버에서 초기값 가져오기
+      
+      Serial.println(message);
       switch(getvaluecheck){
         //무게값 받아오기
           case 0:
@@ -94,7 +77,7 @@ void loop() {
           getvaluecheck++;
       }
       //서버에서 오는 메시지 대기
-       String message = client.readStringUntil('\n');
+       message = client.readStringUntil('\n');
        Serial.print(message);
        //컨베이어에서 오는 stop메시지
        if(message=="stop"){
@@ -116,14 +99,14 @@ void loop() {
             //있을 경우 왼쪽으로 회전/양품 
               for (int i=90;i<=180;i++){
                   myservo.write(i);
-                  delay(3);
+                  delay(10);
                 }
             }
             else{
               //범위 밖일 경우 오른쪽으로 회전/불량품
                for (int i=90;i>=0;i--){
                 myservo.write(i);
-                delay(3);
+                delay(10);
                 }
             }
         delay(500);//0.5초간의 딜레이
