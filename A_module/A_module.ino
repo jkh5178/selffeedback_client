@@ -61,9 +61,9 @@ void loop()
         openServo.write(120);
         delay(1000);
         openServo.write(0);
-        delay(500);
+        delay(1000);
      }
-     delay(800);
+     delay(1000);
       }
     //Serial.println("Disconnecting...");
     //client.stop();
