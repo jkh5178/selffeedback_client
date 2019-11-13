@@ -8,10 +8,10 @@
 */
 
 
-Servo openServo; //서보모터 제어의 개체
+Servo pushDispensorServo; //서보모터 제어의 개체
 
 int rayValue=0; //적외선 센서의 값을 받는 변수
-int rayPin = D7; // 적외선 센서의 핀번호
+int rayPinCheckCup = D7; // 적외선 센서의 핀번호
 
 bool playKey = false; //공정 작동을 제어하기 위한 bool 변수
 
@@ -30,9 +30,9 @@ void setup()
 {
   Serial.begin(115200); // Serial 모니터 값 115200 설정
   connectHelper.connectWiFi(ssid,password);
-  pinMode(rayPin, INPUT);
-  openServo.attach(D8); //서보 모터 연결 pin번호
-  openServo.write(0); // 서보 모터의 값 0으로 초기화
+  pinMode(rayPinCheckCup, INPUT);
+  pushDispensorServo.attach(D8); //서보 모터 연결 pin번호
+  pushDispensorServo.write(0); // 서보 모터의 값 0으로 초기화
 }
 
 
@@ -51,16 +51,16 @@ void loop()
       while(!connectHelper.readStart(client,&playKey,&message)){
       }
       
-      //rayValue = analogRead(rayPin);
+      //rayValue = analogRead(rayPinCheckCup);
       //Serial.println(rayValue);
       
       //적외선 값이 100보다 클때(즉 물체인식을 하지 못할 때) 서보모터 제어
-      if(digitalRead(rayPin)==1){
+      if(digitalRead(rayPinCheckCup)==1){
         //start servo
         delay(500);
-        openServo.write(120);
+        pushDispensorServo.write(120);
         delay(1000);
-        openServo.write(0);
+        pushDispensorServo.write(0);
         delay(1000);
      }
      delay(1000);

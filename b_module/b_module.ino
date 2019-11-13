@@ -4,16 +4,19 @@
   B_module
   공정 기능 : 
 */
-Servo myServo; // 서보모터 제어의 개체
+Servo openServo; // 서보모터 제어의 개체
 
 bool playKey = false; //공정 작동을 제어하기 위한 bool 변수
 bool getValueCheck=false; // 서버로부터 맞는 값이 들어왔는지 확인하기 위한 bool 변수
 
-const char* ssid = "smartFactory"; // 사용할 wifi ID
-const char* password =  "smart1234"; // 사용할 wifi PW
+const char* SSID = "smartFactory"; // 사용할 wifi ID
+const char* PASSWORD =  "smart1234"; // 사용할 wifi PW
  
-const uint16_t port = 8090; // 서버 접속 포트번호
-const char * host = "192.168.0.2"; // 서버의 IP주소
+const uint16_t PORT = 8090; // 서버 접속 포트번호
+const char * HOST = "192.168.0.2"; // 서버의 IP주소
+
+
+const int 
 
 int openTime=0; // 서보모터 제어시간 0으로 초기화
 
@@ -21,18 +24,18 @@ FactoryClient connectHelper;
 const char* moduleName ="B";
 
 void setup() {
-  myServo.attach(D8); //서보모터 연결 pin번호
+  openServo.attach(D8); //서보모터 연결 pin번호
   Serial.begin(115200); // Serial 모니터 값 115200 설정
-  connectHelper.connectWiFi(ssid,password);
-  myServo.write(0); // 초기 서보모터 값 0으로 설정
+  connectHelper.connectWiFi(SSID,PASSWORD);
+  openServo.write(0); // 초기 서보모터 값 0으로 설정
 }
 
 
 String message="";
 void loop() {
     WiFiClient client;
-    myServo.write(0); 
-    if(!connectHelper.connectedServer(port,host,moduleName,&client)){
+    openServo.write(0); 
+    if(!connectHelper.connectedServer(PORT,HOST,moduleName,&client)){
       return;
     }
     bool playKey = false;
@@ -53,9 +56,9 @@ void loop() {
       //서버로부터 메세지 수신대기
       message=client.readStringUntil('\n');
       if(message=="stop"){//stop 메시지가 날라올 경우
-        myServo.write(15);//15도로 서보모터를 열기
+        openServo.write(15);//15도로 서보모터를 열기
         delay(openTime);//2초간의 딜레이
-        myServo.write(0);//0도로 닫기
+        openServo.write(0);//0도로 닫기
         delay(500);//0.5초간의 딜레이
         client.print("go");//go메시지 전달
         }

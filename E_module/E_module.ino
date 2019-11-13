@@ -1,0 +1,41 @@
+#include "FactoryClient.h"
+
+
+
+const char* moduleName = "E";
+
+int rayPinCheckCup = D6;
+int rayPinCheckProduct = D7;
+
+
+FactoryClient connectHelper;
+
+WiFiClient client;
+
+const char* SSID = "smartFactory";
+const char* PASSWORD =  "smart1234";
+
+const uint16_t PORT = 8090;
+const char * HOST = "192.168.0.2";
+
+void setup() {
+  Serial.begin(115200);
+  connectHelper.connectWiFi(SSID,PASSWORD);
+  pinMode(rayPinCheckCup,INPUT);
+  pinMode(rayPinCheckProduct,INPUT);
+}
+
+void loop() {
+  if (!connectHelper.connectedServer(PORT,HOST,modulName,&client)) {
+        return;
+    }
+  while(client.connected()){
+    if( digitalRead(rayPinCheckCup)==1){
+      client.print("A");
+    }
+    if (digitalRead(rayPinCheckProduct)==1){
+      client.print("B");
+    }
+  }
+  delay(10000);
+}
