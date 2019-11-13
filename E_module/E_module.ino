@@ -2,7 +2,7 @@
 
 
 
-const char* moduleName = "E";
+const char* modulName = "E";
 
 int rayPinCheckCup = D6;
 int rayPinCheckProduct = D7;
@@ -27,15 +27,19 @@ void setup() {
 
 void loop() {
   if (!connectHelper.connectedServer(PORT,HOST,modulName,&client)) {
+    Serial.println("!!!!!!!!!!!!!!!!");
         return;
     }
+    
   while(client.connected()){
     if( digitalRead(rayPinCheckCup)==1){
+      Serial.println("A err");
       client.print("A");
     }
     if (digitalRead(rayPinCheckProduct)==1){
+      Serial.println("B err");
       client.print("B");
     }
+      delay(5000);
   }
-  delay(10000);
 }
