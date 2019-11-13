@@ -97,17 +97,20 @@ void loop() {
            //범위 안에 센서값이 있는지 측정
            if( value>=(weight-weight*range) && value<=(weight+weight*range)){
             //있을 경우 왼쪽으로 회전/양품 
-              for (int i=90;i<=180;i++){
+            //myservo.write(180);
+              /**/for (int i=90;i<=180;i++){
                   myservo.write(i);
-                  delay(10);
+                  delay(1);
                 }
+                /**/
             }
             else{
+              //myservo.write(0);
               //범위 밖일 경우 오른쪽으로 회전/불량품
-               for (int i=90;i>=0;i--){
+               /**/for (int i=90;i>=0;i--){
                 myservo.write(i);
-                delay(10);
-                }
+                delay(1);
+                }/**/
             }
         delay(500);//0.5초간의 딜레이
         //분류를 한후 원위치로 조정
