@@ -87,12 +87,13 @@ void loop() {
        Serial.print(message);
        //컨베이어에서 오는 stop메시지
        if(message=="stop"){
-           for(int i=0;i<=90;i++){
+          pushServo.write(80);
+           for(int i=80;i<=100;i++){
             pushServo.write(i);
             delay(10);
            }
            pushServo.write(0);
-           
+           delay(100);
            //무게 측정 10개의 측정후 평균 계산
            float value=abs(scale.get_units(10));
            delay(1000);
