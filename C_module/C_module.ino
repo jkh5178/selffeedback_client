@@ -6,7 +6,9 @@
 #include "FactoryClient.h"
 #include <Servo.h>
 //서버 모터, 무게센서  클래스 생성
-Servo myservo; 
+Servo myservo;
+Servo pushServo;
+ 
 HX711 scale;
 WiFiClient client;
 FactoryClient connectHelper;
@@ -35,6 +37,8 @@ void setup() {
   scale.set_scale(-2875);   //스케일 지정  무게측정의 값 조정
   myservo.attach(D8);//D8번 핀으로 서보모터 조작
   myservo.write(90);
+  pushServo.attach(D2);
+  pushServo.write(0);
   scale.tare();  //스케일 설정 0점 조절
   connectHelper.connectWiFi(SSID,PASSWORD);
   Serial.println("HX711 scale TEST");  
@@ -76,13 +80,19 @@ void loop() {
           }
           getvaluecheck++;
       }
+
+      
       //서버에서 오는 메시지 대기
        message = client.readStringUntil('\n');
        Serial.print(message);
        //컨베이어에서 오는 stop메시지
        if(message=="stop"){
-            //컵이 무게센서에 대기후
-           delay(1000);
+           for(int i=0;i<=90;i++){
+            pushServo.write(i);
+            delay(10);
+           }
+           pushServo.write(0);
+           
            //무게 측정 10개의 측정후 평균 계산
            float value=abs(scale.get_units(10));
            delay(1000);

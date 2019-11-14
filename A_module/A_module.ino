@@ -63,7 +63,7 @@ void loop()
         pushDispensorServo.write(0);
         delay(1000);
      }
-     delay(1000);
+     delay(4000);
       }
     //Serial.println("Disconnecting...");
     //client.stop();
