@@ -28,7 +28,21 @@ const int LOADCELL_SCK_PIN = D6;
 //목표무게와 판별 범위를 위한 변수
 int weight=0;
 float range=0.0;
-
+bool waitMessage(){
+    //stop
+        bool key=true;
+        while(key){
+        String message=client.readStringUntil('\n');//5초
+        if(message=="true"){
+          key=false;
+            return true;
+          }
+        else if(message=="false"){
+          key=false;
+          return false;
+          }
+       }
+    }
 
 //시스템 시작점
 void setup() {
@@ -66,7 +80,6 @@ void loop() {
       
       while(!connectHelper.readStart(client,&play_key,&message)){
       //서버에서 초기값 가져오기
-      
       Serial.println(message);
       switch(getvaluecheck){
         //무게값 받아오기
@@ -80,7 +93,7 @@ void loop() {
           }
           getvaluecheck++;
       }
-
+      getvaluecheck=0;
       
       //서버에서 오는 메시지 대기
        message = client.readStringUntil('\n');
@@ -104,14 +117,14 @@ void loop() {
            dtostrf(value,6,3,sendtemp);
            //server로 value 전달
            client.print(sendtemp);
-
            //범위 안에 센서값이 있는지 측정
-           if( value>=(weight-weight*range) && value<=(weight+weight*range)){
+           bool checkweight=waitMessage();
+           if(checkweight ){
             //있을 경우 왼쪽으로 회전/양품 
             //myservo.write(180);
               /**/for (int i=90;i<=180;i++){
                   myservo.write(i);
-                  delay(1);
+                  delay(4);
                 }
                 /**/
             }
@@ -120,7 +133,7 @@ void loop() {
               //범위 밖일 경우 오른쪽으로 회전/불량품
                /**/for (int i=90;i>=0;i--){
                 myservo.write(i);
-                delay(1);
+                delay(4);
                 }/**/
             }
         delay(500);//0.5초간의 딜레이
@@ -129,6 +142,22 @@ void loop() {
         //컨베이어로 끝났다는 메시지 전송
         client.print("go");//go메시지 전달
         }
+        else if(message=="end"){
+          play_key = false;
+          }
+        else{
+           switch(getvaluecheck){
+        //무게값 받아오기
+          case 0:
+            weight=message.toInt();
+            break;
+        //판별 범위 받아오기
+          case 1:
+            range=0.01*message.toInt();
+            break;
+          }
+          getvaluecheck++;
+          }
       delay(1500);
       }
 }
