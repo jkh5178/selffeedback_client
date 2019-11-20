@@ -65,9 +65,19 @@ void loop()
       //적외선 값이 100보다 클때(즉 물체인식을 하지 못할 때) 서보모터 제어
       if(digitalRead(rayPinCheckCup)==1){
         //start servo
+<<<<<<< HEAD
         servoMove();
      }
      delay(6000);
+=======
+        delay(500);
+        pushDispensorServo.write(120);
+        delay(1000);
+        pushDispensorServo.write(0);
+        delay(1000);
+     }
+     delay(4000);
+>>>>>>> parent of 8eabf90... jkh
       }
     //Serial.println("Disconnecting...");
     //client.stop();

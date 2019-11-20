@@ -32,14 +32,22 @@ void loop() {
     }
     
   while(client.connected()){
-    if( digitalRead(rayPinCheckCup)==1){
-      Serial.println("A err");
-      client.print("A");
+    int remaincup=digitalRead(rayPinCheckCup);
+    int remainproduct=digitalRead(rayPinCheckProduct);
+    if(remaincup+remainproduct==2){
+      client.print("A,B");
+      }
+    else 
+    {
+      if( digitalRead(rayPinCheckCup)==1){
+        Serial.println("A err");
+        client.print("A");
+        }
+      if (digitalRead(rayPinCheckProduct)==1){
+         Serial.println("B err");
+         client.print("B");
+         }
     }
-    if (digitalRead(rayPinCheckProduct)==1){
-      Serial.println("B err");
-      client.print("B");
-    }
-      delay(5000);
+      delay(3000);
   }
 }
