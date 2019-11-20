@@ -10,8 +10,8 @@
 
 Servo pushDispensorServo; //서보모터 제어의 개체
 
-int rayValue=0; //적외선 센서의 값을 받는 변수
-int rayPinCheckCup = D7; // 적외선 센서의 핀번호
+//int rayValue=0; //적외선 센서의 값을 받는 변수
+//int rayPinCheckCup = D7; // 적외선 센서의 핀번호
 
 bool playKey = false; //공정 작동을 제어하기 위한 bool 변수
 
@@ -62,12 +62,16 @@ void loop()
       //rayValue = analogRead(rayPinCheckCup);
       //Serial.println(rayValue);
       
+<<<<<<< HEAD
       //적외선 값이 100보다 클때(즉 물체인식을 하지 못할 때) 서보모터 제어
       if(digitalRead(rayPinCheckCup)==1){
         //start servo
 <<<<<<< HEAD
         servoMove();
      }
+=======
+     servoMove();
+>>>>>>> parent of e56543f... Merge branch 'master' of https://github.com/jkh5178/selffeedback_client
      delay(6000);
 =======
         delay(500);

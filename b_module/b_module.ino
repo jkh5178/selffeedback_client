@@ -16,7 +16,6 @@ const uint16_t PORT = 8090; // 서버 접속 포트번호
 const char * HOST = "192.168.0.2"; // 서버의 IP주소
 
 
-const int 
 
 int openTime=0; // 서보모터 제어시간 0으로 초기화
 
