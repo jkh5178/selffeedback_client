@@ -61,7 +61,6 @@ void loop()
       
       //rayValue = analogRead(rayPinCheckCup);
       //Serial.println(rayValue);
-
       //적외선 값이 100보다 클때(즉 물체인식을 하지 못할 때) 서보모터 제어
       if(digitalRead(rayPinCheckCup)==1){
         //start servo
@@ -76,7 +75,6 @@ void loop()
         delay(1000);
      }
      delay(4000);
-
       }
     //Serial.println("Disconnecting...");
     //client.stop();
